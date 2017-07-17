@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
 const UserSchema = new Schema({
+  name       :String,
+  lastname   :String,
+  campus     :String,
+  telephone  :Number,
+  isAdmin    :{type:Boolean, default:false},
+  isContributor:{type:Boolean, default:false},
   email      : String,
   username   : String,
   password   : String,

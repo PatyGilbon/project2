@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var router = express.Router();
 const passport           = require('passport');
 const session            = require('express-session');
 const MongoStore         = require('connect-mongo')(session);
@@ -12,6 +13,7 @@ const LocalStrategy      = require('passport-local').Strategy;
 const User               = require('./models/user');
 const bcrypt             = require('bcrypt');
 const mongoose           = require('mongoose');
+const flash              = require("connect-flash");
 
 mongoose.connect('mongodb://localhost:27017/ironfunds-development');
 
@@ -19,6 +21,7 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 const authRoutes = require('./routes/authentication.js');
 var profile = require('./routes/profile.js');
+var information=require('./routes/information.js');
 
 var app = express();
 app.use('/bower_components', express.static(path.join(__dirname, 'bower_components/')))
@@ -62,11 +65,12 @@ passport.deserializeUser((id, cb) => {
     cb(null, user);
   });
 });
+
 passport.use('local-signup', new LocalStrategy(
   { passReqToCallback: true },
-  (req, username, password, next) => {
-    // To avoid race conditions
-    process.nextTick(() => {
+ (req, username, password, next) => {
+   // To avoid race conditions
+   process.nextTick(() => {
         User.findOne({
             'username': username
         }, (err, user) => {
@@ -81,7 +85,6 @@ passport.use('local-signup', new LocalStrategy(
                 const newUser = new User({
                   username,
                   email,
-                  description,
                   password: hashPass
                 });
 
@@ -94,20 +97,22 @@ passport.use('local-signup', new LocalStrategy(
     });
 }));
 passport.use('local-login', new LocalStrategy((username, password, next) => {
-  User.findOne({ username }, (err, user) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return next(null, false, { message: "Incorrect username" });
-    }
-    if (!bcrypt.compareSync(password, user.password)) {
-      return next(null, false, { message: "Incorrect password" });
-    }
+      User.findOne({ username }, (err, user) => {
+        if (err) {
+          return next(err);
+        }
+        if (!user) {
+          return next(null, false, { message: "Incorrect username" });
+        }
+        if (!bcrypt.compareSync(password, user.password)) {
+          return next(null, false, { message: "Incorrect password" });
+        }
 
-    return next(null, user);
+        return next(null, user);
   });
 }));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -115,6 +120,8 @@ app.use('/', index);
 app.use('/users', users);
 app.use('/', authRoutes);
 app.use('/profile', profile);
+app.use('/information',information);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
