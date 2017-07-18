@@ -39,7 +39,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-
+app.use(flash());
 
 app.use( (req, res, next) => {
   if (typeof(req.user) !== "undefined"){
@@ -96,18 +96,21 @@ passport.use('local-signup', new LocalStrategy(
         });
     });
 }));
-passport.use('local-login', new LocalStrategy((username, password, next) => {
+
+passport.use('local-login', new LocalStrategy({ passReqToCallback: true },(req,username, password, next) => {
       User.findOne({ username }, (err, user) => {
         if (err) {
           return next(err);
         }
         if (!user) {
           return next(null, false, { message: "Incorrect username" });
+          //return next(null, false, req.flash('loginMessage', 'User does not exist'));
+
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return next(null, false, { message: "Incorrect password" });
         }
-
+        console.log("user",user);
         return next(null, user);
   });
 }));
