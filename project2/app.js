@@ -15,6 +15,7 @@ const bcrypt             = require('bcrypt');
 const mongoose           = require('mongoose');
 const flash              = require("connect-flash");
 
+//mongoose.connect(process.env.MONGODB_URI);
 mongoose.connect('mongodb://localhost:27017/ironfunds-development');
 
 var index = require('./routes/index');

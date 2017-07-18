@@ -17,9 +17,7 @@ router.get('/signup', (req, res) => {
 
 router.post('/signup', passport.authenticate('local-signup', {
   successRedirect : '/profile',
-  failureRedirect : '/signup',
-  failureFlash: true,
-  passReqToCallback: true
+  failureRedirect : '/signup'
 }));
 
 
@@ -29,12 +27,10 @@ router.get('/login', (req, res) => {
 
 router.post('/login', passport.authenticate('local-login', {
   successRedirect : '/profile',
-  failureRedirect : '/login',
-  failureFlash: true,
-  passReqToCallback: true
+  failureRedirect : '/login'
 }));
 
-router.post('/logout', (req, res) => {
+router.post('/logout', ensureLoggedIn('/login'),(req, res) => {
     req.logout();
     res.redirect('/');
 });
